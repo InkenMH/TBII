@@ -1,24 +1,16 @@
-USERNAME = ""
+from sql_save import *
+import os
 
-FIRSTROUNDDICTIONARY = {"question" : "Wat do you want to drink?",
-                        1: "Beer",
-                        2: "Coke",
-                        3: "Wine",
-                        4: "Water"}
-
-SECONDROUNDC1 = {"question" : "Which person do you want to meet?",
-                        1: "P1",
-                        2: "P2",
-                        3: "P3",
-                        4: "P4"}
-
-SECONDROUNDC2 = {"question" : "Do you take the same drink again?",
-                        1: "YES",
-                        2: "NO"}
-
-FIRSTROUNDTRANSITION = {1: SECONDROUNDC1, 2: SECONDROUNDC1, 3: SECONDROUNDC2, 4: SECONDROUNDC2}
 
 def start_game():
+    dbFileName = 'game.db'
+
+    # As file at filePath is deleted now, so we should check if file exists or not not before deleting them
+    if os.path.exists(dbFileName):
+        os.remove(dbFileName)
+    else:
+        print("Can not delete the file as it doesn't exists")
+
     username = input("Before we start the game please enter your name:\n")
 
     while not valid_name(username):
@@ -27,55 +19,56 @@ def start_game():
     # needs to acces the global not the local var
     global USERNAME
     USERNAME = username
+    question_table = "question"
+    answer_table = "answers"
+    user_answer_table = "user_answers"
+    createQuestionTableWithData(dbFileName, question_table)
 
-    greet_user()
-    start_playing()
+    createAnswerTableWithData(answer_table, dbFileName)
+
+    createTable(dbFileName, user_answer_table,
+                "(id INTEGER PRIMARY KEY, questionID INTEGER, answerID INTEGER, FOREIGN KEY(questionID) REFERENCES question(id), FOREIGN KEY(answerID) REFERENCES answers(id))")
+    
+
+def createQuestionTableWithData(dbFileName, question_table):
+    createTable(dbFileName, question_table, "(id INTEGER PRIMARY KEY, question TEXT)")
+    insertData(dbFileName, question_table, "(1, 'What do you want to drink?')")
+    insertData(dbFileName, question_table, "(2, 'What are you going to do?')")
+    insertData(dbFileName, question_table, "(3, 'Do you try to help the nervous guy?')")
+    insertData(dbFileName, question_table, "(4, 'Do you decide to call the police?')")
+    insertData(dbFileName, question_table, "(5, 'Do you want to follow them?')")
+    insertData(dbFileName, question_table, "(6, 'What do you do now?')")
+    insertData(dbFileName, question_table, "(7, 'Do you want to go back to the front and wait for the police?')")
+    insertData(dbFileName, question_table, "(8, 'When you see the police arriving, what are you going to do?')")
+    insertData(dbFileName, question_table, "(9, 'What do you say?')")
 
 
-def valid_name(name):
-    # a valid username has to have at least 2 characters and max 30
-    # feel free to code a more sensible check ;)
-    return 2 <= len(name) <= 30
-
-def greet_user():
-    special_greeting = False
-    if special_greeting:
-        print("A special hello", USERNAME, "I like to play with you!")
-    else:
-        print("Hello", USERNAME, "I like to play with you!")
-
-def start_playing():
-    print("\n")
-    print(USERNAME, ", your first choice should be easy...")
-
-    choice = play_round_with_dict(FIRSTROUNDDICTIONARY)
-    nextDict = FIRSTROUNDTRANSITION[choice]
-    choice = play_round_with_dict(nextDict)
-
-    quit_game()
-
-def play_round_with_dict(dict):
-    max_choice = len(dict)
-
-    print(dict["question"])
-    # go over all possible answeres
-    for i in range(1,max_choice):
-        print("[", str(i) ,"]", dict[i])
-
-    choice = get_users_choice(max_choice)
-
-    print("Your choice was", dict[choice], "...")
-
-    return choice
-
-def get_users_choice(max_choice):
-    c = input("Make your decision by typing a number:\n")
-    while not int(c) in range(1,max_choice):
-        c = input("That was an invalid input, please type a valid number:\n")
-    return int(c)
-
-def quit_game():
-    print("It was nice to play with you" , USERNAME)
-
-if __name__ == "__main__":
-    start_game()
+def createAnswerTableWithData(answer_table, dbFileName):
+    createTable(dbFileName, answer_table,
+                "(id INTEGER PRIMARY KEY, questionID INTEGER, answer TEXT, FOREIGN KEY(questionID) REFERENCES question(id))")
+    insertData(dbFileName, answer_table, "(1, 1, 'Beer')")
+    insertData(dbFileName, answer_table, "(2, 1, 'Coke')")
+    insertData(dbFileName, answer_table, "(3, 1, 'Wine')")
+    insertData(dbFileName, answer_table, "(4, 1, 'Water')")
+    insertData(dbFileName, answer_table, "(5, 2, 'try to listen closely to their conversation')")
+    insertData(dbFileName, answer_table,
+               "(6, 2, 'leave the bar, because you do not want to get involved in suspicious activities')")
+    insertData(dbFileName, answer_table, "(7, 3, 'you try to make eye contact with the guy to give him a signal')")
+    insertData(dbFileName, answer_table,
+               "(8, 3, 'you take a piece of paper and write down: do you need help?, then you carefully place the piece of paper into his jacket while you are going over to the bar')")
+    insertData(dbFileName, answer_table, "(9, 3, 'no, you are too scared to take action')")
+    insertData(dbFileName, answer_table, "(10, 3, 'you have finished your drink and leave the bar to go home')")
+    insertData(dbFileName, answer_table, "(11, 4, 'yes')")
+    insertData(dbFileName, answer_table, "(12, 4, 'no')")
+    insertData(dbFileName, answer_table, "(13, 5, 'yes, but you wait a little bit to not make it too obvious')")
+    insertData(dbFileName, answer_table,
+               "(14, 5, 'no, you are too scared to follow them and you rather wait for the police')")
+    insertData(dbFileName, answer_table, "(15, 6, 'go to the door and open it a tiny bt to listen')")
+    insertData(dbFileName, answer_table, "(16, 6, 'try to stand in front of the door and listen to the conversation')")
+    insertData(dbFileName, answer_table, "(17, 7, 'yes')")
+    insertData(dbFileName, answer_table, "(18, 7, 'no')")
+    insertData(dbFileName, answer_table, "(19, 8, 'you wave and show them the way to the back')")
+    insertData(dbFileName, answer_table,
+               "(20, 8, 'you go over to the barkeeper and tell him to lead the way for the police')")
+    insertData(dbFileName, answer_table, "(21, 9, 'yes')")
+    insertData(dbFileName, answer_table, "(22, 9, 'no')")
